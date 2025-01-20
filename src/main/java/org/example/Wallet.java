@@ -3,7 +3,9 @@ package org.example;
 import java.math.BigDecimal;
 import java.util.*;
 
+// Модель кошелька пользователя
 public class Wallet {
+
     private BigDecimal balance;
     private final List<Transaction> transactions;
     private final Map<String, BigDecimal> budgets;

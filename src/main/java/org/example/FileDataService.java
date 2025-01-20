@@ -2,7 +2,6 @@ package org.example;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-
 import java.io.*;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -12,53 +11,85 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+// Реализация сервиса данных с хранением в JSON файле
 public class FileDataService implements DataService {
+
     private static final String FILE_PATH = "users.json";
     private final Gson gson;
     private final Map<String, User> users;
 
     public FileDataService() {
         this.gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                .registerTypeAdapter(Transaction.class, new TransactionAdapter())
-                .registerTypeAdapter(BigDecimal.class, new BigDecimalAdapter())
-                .registerTypeAdapter(Wallet.class, new WalletAdapter())
-                .create();
+            .setPrettyPrinting()
+            .registerTypeAdapter(
+                LocalDateTime.class,
+                new LocalDateTimeAdapter()
+            )
+            .registerTypeAdapter(Transaction.class, new TransactionAdapter())
+            .registerTypeAdapter(BigDecimal.class, new BigDecimalAdapter())
+            .registerTypeAdapter(Wallet.class, new WalletAdapter())
+            .create();
         this.users = loadData();
     }
 
-    private static class LocalDateTimeAdapter implements JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
-        private static final DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    // Сериализации
+    private static class LocalDateTimeAdapter
+        implements
+            JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+
+        private static final DateTimeFormatter formatter =
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
         @Override
-        public JsonElement serialize(LocalDateTime src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(
+            LocalDateTime src,
+            Type typeOfSrc,
+            JsonSerializationContext context
+        ) {
             return new JsonPrimitive(formatter.format(src));
         }
 
         @Override
-        public LocalDateTime deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
+        public LocalDateTime deserialize(
+            JsonElement json,
+            Type typeOfT,
+            JsonDeserializationContext context
+        ) throws JsonParseException {
             return LocalDateTime.parse(json.getAsString(), formatter);
         }
     }
 
-    private static class BigDecimalAdapter implements JsonSerializer<BigDecimal>, JsonDeserializer<BigDecimal> {
+    private static class BigDecimalAdapter
+        implements JsonSerializer<BigDecimal>, JsonDeserializer<BigDecimal> {
+
         @Override
-        public JsonElement serialize(BigDecimal src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(
+            BigDecimal src,
+            Type typeOfSrc,
+            JsonSerializationContext context
+        ) {
             return new JsonPrimitive(src);
         }
 
         @Override
-        public BigDecimal deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
+        public BigDecimal deserialize(
+            JsonElement json,
+            Type typeOfT,
+            JsonDeserializationContext context
+        ) throws JsonParseException {
             return new BigDecimal(json.getAsString());
         }
     }
 
-    private static class TransactionAdapter implements JsonSerializer<Transaction>, JsonDeserializer<Transaction> {
+    private static class TransactionAdapter
+        implements JsonSerializer<Transaction>, JsonDeserializer<Transaction> {
+
         @Override
-        public JsonElement serialize(Transaction src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(
+            Transaction src,
+            Type typeOfSrc,
+            JsonSerializationContext context
+        ) {
             JsonObject jsonObject = new JsonObject();
             jsonObject.add("amount", context.serialize(src.getAmount()));
             jsonObject.addProperty("category", src.getCategory());
@@ -68,39 +99,61 @@ public class FileDataService implements DataService {
         }
 
         @Override
-        public Transaction deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
+        public Transaction deserialize(
+            JsonElement json,
+            Type typeOfT,
+            JsonDeserializationContext context
+        ) throws JsonParseException {
             JsonObject jsonObject = json.getAsJsonObject();
-            BigDecimal amount = context.deserialize(jsonObject.get("amount"), BigDecimal.class);
+            BigDecimal amount = context.deserialize(
+                jsonObject.get("amount"),
+                BigDecimal.class
+            );
             String category = jsonObject.get("category").getAsString();
-            TransactionType type = TransactionType.valueOf(jsonObject.get("type").getAsString());
+            TransactionType type = TransactionType.valueOf(
+                jsonObject.get("type").getAsString()
+            );
 
             return new Transaction(amount, category, type);
         }
     }
 
-    private static class WalletAdapter implements JsonSerializer<Wallet>, JsonDeserializer<Wallet> {
+    private static class WalletAdapter
+        implements JsonSerializer<Wallet>, JsonDeserializer<Wallet> {
+
         @Override
-        public JsonElement serialize(Wallet src, Type typeOfSrc, JsonSerializationContext context) {
+        public JsonElement serialize(
+            Wallet src,
+            Type typeOfSrc,
+            JsonSerializationContext context
+        ) {
             JsonObject jsonObject = new JsonObject();
             jsonObject.add("balance", context.serialize(src.getBalance()));
-            jsonObject.add("transactions", context.serialize(src.getTransactions()));
+            jsonObject.add(
+                "transactions",
+                context.serialize(src.getTransactions())
+            );
             jsonObject.add("budgets", context.serialize(src.getBudgets()));
             return jsonObject;
         }
 
         @Override
-        public Wallet deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
+        public Wallet deserialize(
+            JsonElement json,
+            Type typeOfT,
+            JsonDeserializationContext context
+        ) throws JsonParseException {
             JsonObject jsonObject = json.getAsJsonObject();
 
             Wallet wallet = new Wallet();
 
             // Восстанавливаем транзакции
-            Type transactionListType = new TypeToken<List<Transaction>>(){}.getType();
+            Type transactionListType = new TypeToken<
+                List<Transaction>
+            >() {}.getType();
             List<Transaction> transactions = context.deserialize(
-                    jsonObject.get("transactions"),
-                    transactionListType
+                jsonObject.get("transactions"),
+                transactionListType
             );
             if (transactions != null) {
                 for (Transaction transaction : transactions) {
@@ -109,10 +162,12 @@ public class FileDataService implements DataService {
             }
 
             // Восстанавливаем бюджеты
-            Type budgetMapType = new TypeToken<Map<String, BigDecimal>>(){}.getType();
+            Type budgetMapType = new TypeToken<
+                Map<String, BigDecimal>
+            >() {}.getType();
             Map<String, BigDecimal> budgets = context.deserialize(
-                    jsonObject.get("budgets"),
-                    budgetMapType
+                jsonObject.get("budgets"),
+                budgetMapType
             );
             if (budgets != null) {
                 for (Map.Entry<String, BigDecimal> entry : budgets.entrySet()) {
@@ -124,6 +179,7 @@ public class FileDataService implements DataService {
         }
     }
 
+    // Сохранение данных в файл
     @Override
     public void saveData(Map<String, User> users) {
         try (Writer writer = Files.newBufferedWriter(Paths.get(FILE_PATH))) {
@@ -133,6 +189,7 @@ public class FileDataService implements DataService {
         }
     }
 
+    // Загрузка данных из файла
     @Override
     public Map<String, User> loadData() {
         try {
@@ -149,8 +206,10 @@ public class FileDataService implements DataService {
                 return emptyMap;
             }
 
-            try (Reader reader = Files.newBufferedReader(Paths.get(FILE_PATH))) {
-                Type type = new TypeToken<Map<String, User>>(){}.getType();
+            try (
+                Reader reader = Files.newBufferedReader(Paths.get(FILE_PATH))
+            ) {
+                Type type = new TypeToken<Map<String, User>>() {}.getType();
                 Map<String, User> loadedUsers = gson.fromJson(reader, type);
                 return loadedUsers != null ? loadedUsers : new HashMap<>();
             }
@@ -165,6 +224,7 @@ public class FileDataService implements DataService {
         }
     }
 
+    // Операции с пользователями
     public void addUser(User user) {
         users.put(user.getUsername(), user);
         saveData(users);

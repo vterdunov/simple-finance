@@ -1,6 +1,8 @@
 package org.example;
 
+// Точка входа в приложение
 public class FinanceApplication {
+
     private final ConsoleReader consoleReader;
     private final AuthenticationService authService;
     private final FinancialOperationService financialService;
@@ -10,9 +12,14 @@ public class FinanceApplication {
         this.dataService = new FileDataService();
         this.authService = new AuthenticationServiceImpl(dataService);
         this.financialService = new FinancialOperationServiceImpl(authService);
-        this.consoleReader = new ConsoleReader(authService, financialService, dataService);
+        this.consoleReader = new ConsoleReader(
+            authService,
+            financialService,
+            dataService
+        );
     }
 
+    // Стартуем
     public void run() {
         consoleReader.start();
     }

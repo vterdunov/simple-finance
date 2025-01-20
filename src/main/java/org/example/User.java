@@ -2,7 +2,9 @@ package org.example;
 
 import java.util.Objects;
 
+// Модель пользователя
 public class User {
+
     private final String username;
     private String password;
     private final Wallet wallet;

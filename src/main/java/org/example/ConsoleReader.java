@@ -4,19 +4,26 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Scanner;
 
+// Обработка консольного ввода/вывода и управление взаимодействием с пользователем
 public class ConsoleReader {
+
     private final Scanner scanner;
     private final AuthenticationService authService;
     private final FinancialOperationService financialService;
     private final DataService dataService;
 
-    public ConsoleReader(AuthenticationService authService, FinancialOperationService financialService, DataService dataService) {
+    public ConsoleReader(
+        AuthenticationService authService,
+        FinancialOperationService financialService,
+        DataService dataService
+    ) {
         this.scanner = new Scanner(System.in);
         this.authService = authService;
         this.financialService = financialService;
         this.dataService = dataService;
     }
 
+    // Основной цикл
     public void start() {
         boolean running = true;
         while (running) {
@@ -29,17 +36,21 @@ public class ConsoleReader {
         saveAndExit();
     }
 
+    // Сохранение данных о пользователе при выходе
     private void saveAndExit() {
         try {
             if (authService.isAuthenticated()) {
                 User currentUser = authService.getCurrentUser();
-                dataService.saveData(Map.of(currentUser.getUsername(), currentUser));
+                dataService.saveData(
+                    Map.of(currentUser.getUsername(), currentUser)
+                );
             }
         } finally {
             scanner.close();
         }
     }
 
+    // Меню аутентификации для неавторизованных пользователей
     private boolean handleAuthenticationMenu() {
         System.out.println("\n=== Authentication Menu ===");
         System.out.println("1. Login");
@@ -59,6 +70,7 @@ public class ConsoleReader {
         return true;
     }
 
+    // Главное меню для авторизованных пользователей
     private boolean handleMainMenu() {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. Add Income");
@@ -89,6 +101,7 @@ public class ConsoleReader {
         return true;
     }
 
+    // Обработка входа пользователя
     private void handleLogin() {
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
@@ -103,6 +116,7 @@ public class ConsoleReader {
         }
     }
 
+    // Обработка регистрации нового пользователя
     private void handleRegistration() {
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
@@ -117,6 +131,7 @@ public class ConsoleReader {
         }
     }
 
+    // Добавление дохода
     private void handleAddIncome() {
         try {
             System.out.print("Enter amount: ");
@@ -133,6 +148,7 @@ public class ConsoleReader {
         }
     }
 
+    // Добавление расхода
     private void handleAddExpense() {
         try {
             System.out.print("Enter amount: ");
@@ -149,6 +165,7 @@ public class ConsoleReader {
         }
     }
 
+    // Установка бюджета
     private void handleSetBudget() {
         try {
             System.out.print("Enter category: ");
@@ -165,29 +182,48 @@ public class ConsoleReader {
         }
     }
 
+    // Просмотр текущего баланса
     private void handleViewBalance() {
         System.out.println("\n=== Balance ===");
-        System.out.println("Current balance: " + financialService.getCurrentBalance());
-        System.out.println("Total income: " + financialService.getTotalIncome());
-        System.out.println("Total expenses: " + financialService.getTotalExpenses());
+        System.out.println(
+            "Current balance: " + financialService.getCurrentBalance()
+        );
+        System.out.println(
+            "Total income: " + financialService.getTotalIncome()
+        );
+        System.out.println(
+            "Total expenses: " + financialService.getTotalExpenses()
+        );
     }
 
+    // Просмотр статистики по доходам, расходам и бюджетам
     private void handleViewStatistics() {
         System.out.println("\n=== Statistics ===");
         System.out.println("Income by category:");
-        financialService.getIncomesByCategory()
-                .forEach((category, amount) -> System.out.println(category + ": " + amount));
+        financialService
+            .getIncomesByCategory()
+            .forEach((category, amount) ->
+                System.out.println(category + ": " + amount)
+            );
 
         System.out.println("\nExpenses by category:");
-        financialService.getExpensesByCategory()
-                .forEach((category, amount) -> System.out.println(category + ": " + amount));
+        financialService
+            .getExpensesByCategory()
+            .forEach((category, amount) ->
+                System.out.println(category + ": " + amount)
+            );
 
         System.out.println("\nBudgets by category:");
-        financialService.getBudgetsByCategory()
-                .forEach((category, budget) -> {
-                    BigDecimal spent = financialService.getExpensesByCategory().getOrDefault(category, BigDecimal.ZERO);
-                    BigDecimal remaining = budget.subtract(spent);
-                    System.out.println(category + ": Budget=" + budget + ", Remaining=" + remaining);
-                });
+        financialService
+            .getBudgetsByCategory()
+            .forEach((category, budget) -> {
+                BigDecimal spent = financialService
+                    .getExpensesByCategory()
+                    .getOrDefault(category, BigDecimal.ZERO);
+                BigDecimal remaining = budget.subtract(spent);
+                System.out.println(
+                    category + ": Budget=" + budget + ", Remaining=" + remaining
+                );
+            });
     }
 }

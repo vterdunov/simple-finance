@@ -1,7 +1,12 @@
 package org.example;
 
+// Реализация сервиса аутентификации, управляет регистрацией, входом и выходом пользователей
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    // сервис для работы с данными пользователей
     private final DataService dataService;
+
+    // Текущий авторизованный пользователь
     private User currentUser;
 
     public AuthenticationServiceImpl(DataService dataService) {
@@ -27,6 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public boolean login(String username, String password) {
+        // Проверяем существование пользователя и правильность пароля
         User user = dataService.getUser(username);
         if (user == null || !user.getPassword().equals(password)) {
             throw new AuthenticationException("Invalid username or password");
@@ -42,6 +48,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public User getCurrentUser() {
+        // Проверяем, что пользователь авторизован
         if (currentUser == null) {
             throw new AuthenticationException("No user is currently logged in");
         }
