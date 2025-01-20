@@ -30,11 +30,14 @@ public class ConsoleReader {
     }
 
     private void saveAndExit() {
-        if (authService.getCurrentUser() != null) {
-            dataService.saveData(Map.of(authService.getCurrentUser().getUsername(),
-                    authService.getCurrentUser()));
+        try {
+            if (authService.isAuthenticated()) {
+                User currentUser = authService.getCurrentUser();
+                dataService.saveData(Map.of(currentUser.getUsername(), currentUser));
+            }
+        } finally {
+            scanner.close();
         }
-        scanner.close();
     }
 
     private boolean handleAuthenticationMenu() {
