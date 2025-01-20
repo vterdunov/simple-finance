@@ -4,10 +4,10 @@ public class FinanceApplication {
     private final ConsoleReader consoleReader;
     private final AuthenticationService authService;
     private final FinancialOperationService financialService;
-    private final InMemoryDataService dataService;
+    private final FileDataService dataService;
 
     public FinanceApplication() {
-        this.dataService = new InMemoryDataService();
+        this.dataService = new FileDataService();
         this.authService = new AuthenticationServiceImpl(dataService);
         this.financialService = new FinancialOperationServiceImpl(authService);
         this.consoleReader = new ConsoleReader(authService, financialService);

@@ -1,10 +1,10 @@
 package org.example;
 
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private final InMemoryDataService dataService;
+    private final DataService dataService;
     private User currentUser;
 
-    public AuthenticationServiceImpl(InMemoryDataService dataService) {
+    public AuthenticationServiceImpl(DataService dataService) {
         this.dataService = dataService;
         this.currentUser = null;
     }

@@ -1,0 +1,11 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": "admin",
+    "wallet": {
+      "balance": 0,
+      "transactions": [],
+      "budgets": {}
+    }
+  }
+}
