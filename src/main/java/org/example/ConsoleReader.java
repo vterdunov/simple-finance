@@ -1,17 +1,20 @@
 package org.example;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleReader {
     private final Scanner scanner;
     private final AuthenticationService authService;
     private final FinancialOperationService financialService;
+    private final DataService dataService;
 
-    public ConsoleReader(AuthenticationService authService, FinancialOperationService financialService) {
+    public ConsoleReader(AuthenticationService authService, FinancialOperationService financialService, DataService dataService) {
         this.scanner = new Scanner(System.in);
         this.authService = authService;
         this.financialService = financialService;
+        this.dataService = dataService;
     }
 
     public void start() {
@@ -23,6 +26,15 @@ public class ConsoleReader {
                 running = handleMainMenu();
             }
         }
+        saveAndExit();
+    }
+
+    private void saveAndExit() {
+        if (authService.getCurrentUser() != null) {
+            dataService.saveData(Map.of(authService.getCurrentUser().getUsername(),
+                    authService.getCurrentUser()));
+        }
+        scanner.close();
     }
 
     private boolean handleAuthenticationMenu() {

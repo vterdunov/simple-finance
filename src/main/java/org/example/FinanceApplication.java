@@ -10,7 +10,7 @@ public class FinanceApplication {
         this.dataService = new FileDataService();
         this.authService = new AuthenticationServiceImpl(dataService);
         this.financialService = new FinancialOperationServiceImpl(authService);
-        this.consoleReader = new ConsoleReader(authService, financialService);
+        this.consoleReader = new ConsoleReader(authService, financialService, dataService);
     }
 
     public void run() {
